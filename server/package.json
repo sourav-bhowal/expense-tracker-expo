@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.13.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.13.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@upstash/ratelimit": "^2.0.6",
+    "@upstash/redis": "^1.35.3",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "zod": "^4.0.17"
+  },
+  "scripts": {
+    "start": "bun run --hot index.ts"
+  }
+}
