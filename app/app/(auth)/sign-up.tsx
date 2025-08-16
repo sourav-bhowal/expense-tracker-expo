@@ -1,16 +1,28 @@
-import * as React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
+import { useState } from "react";
+import { styles } from "@/styles/auth.styles";
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "@/constants/colors";
+import { Image } from "expo-image";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
 
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
@@ -27,8 +39,12 @@ export default function SignUpScreen() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
       setPendingVerification(true);
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      if (err.errors) {
+        setError(err.errors[0].longMessage);
+      } else {
+        setError("Something went wrong");
+      }
     }
   };
 
@@ -46,55 +62,90 @@ export default function SignUpScreen() {
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace("/");
       } else {
-        console.error(JSON.stringify(signUpAttempt, null, 2));
+        setError("Invalid OTP");
       }
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+    } catch (err: any) {
+      if (err.errors) {
+        setError(err.errors[0].longMessage);
+      } else {
+        setError("Something went wrong");
+      }
     }
   };
 
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
+      <View style={styles.verificationContainer}>
+        <Text style={styles.verificationTitle}>Verify your email</Text>
+
+        {error && (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={24} color={COLORS.expense} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity onPress={() => setError("")}>
+              <Ionicons name="close" size={24} color={COLORS.textLight} />
+            </TouchableOpacity>
+          </View>
+        )}
+
         <TextInput
           value={code}
-          placeholder="Enter your verification code"
+          placeholder="Enter OTP"
           onChangeText={(code) => setCode(code)}
+          style={[styles.verificationInput, error && styles.errorInput]}
         />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
+        <TouchableOpacity onPress={onVerifyPress} style={styles.button}>
+          <Text style={styles.buttonText}>Verify</Text>
         </TouchableOpacity>
-      </>
+      </View>
     );
   }
 
   return (
-    <View>
-      <>
-        <Text>Sign up</Text>
-        <TextInput
-          autoCapitalize="none"
-          value={emailAddress}
-          placeholder="Enter email"
-          onChangeText={(email) => setEmailAddress(email)}
-        />
-        <TextInput
-          value={password}
-          placeholder="Enter password"
-          secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
-        />
-        <TouchableOpacity onPress={onSignUpPress}>
-          <Text>Continue</Text>
-        </TouchableOpacity>
-        <View style={{ display: "flex", flexDirection: "row", gap: 3 }}>
-          <Text>Already have an account?</Text>
-          <Link href="/(auth)/sign-in">
-            <Text>Sign in</Text>
-          </Link>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <Image
+        source={require("@/assets/images/revenue-i2.png")}
+        style={styles.illustration}
+      />
+      <Text style={styles.title}>Create Account</Text>
+
+      {error && (
+        <View style={styles.errorBox}>
+          <Ionicons name="alert-circle" size={24} color={COLORS.expense} />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={() => setError("")}>
+            <Ionicons name="close" size={24} color={COLORS.textLight} />
+          </TouchableOpacity>
         </View>
-      </>
-    </View>
+      )}
+
+      <TextInput
+        autoCapitalize="none"
+        value={emailAddress}
+        placeholder="Enter email"
+        keyboardType="email-address"
+        onChangeText={(email) => setEmailAddress(email)}
+        style={styles.input}
+      />
+      <TextInput
+        value={password}
+        placeholder="Enter password"
+        secureTextEntry={true}
+        onChangeText={(password) => setPassword(password)}
+        style={styles.input}
+      />
+      <TouchableOpacity onPress={onSignUpPress} style={styles.button}>
+        <Text style={styles.buttonText}>Continue</Text>
+      </TouchableOpacity>
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerText}>Already have an account?</Text>
+        <Link href="/(auth)/sign-in">
+          <Text style={styles.linkText}>Sign in</Text>
+        </Link>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
