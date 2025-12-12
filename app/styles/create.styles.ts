@@ -2,7 +2,7 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../constants/colors";
 
-export const styles = StyleSheet.create({
+export const stylesCreate = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -96,6 +96,11 @@ export const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "bold",
     color: COLORS.text,
+  },
+  amountType: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginLeft: 8,
   },
   inputContainer: {
     flexDirection: "row",

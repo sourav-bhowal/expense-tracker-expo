@@ -1,9 +1,18 @@
 // lib/utils.js
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-IN", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 }
+
+export const CATEGORIES: { id: string; name: string; icon: string }[] = [
+  { id: "food", name: "Food & Drinks", icon: "fast-food" },
+  { id: "shopping", name: "Shopping", icon: "cart" },
+  { id: "transportation", name: "Transportation", icon: "car" },
+  { id: "entertainment", name: "Entertainment", icon: "film" },
+  { id: "bills", name: "Bills", icon: "receipt" },
+  { id: "income", name: "Income", icon: "cash" },
+  { id: "other", name: "Other", icon: "ellipsis-horizontal" },
+];

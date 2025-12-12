@@ -25,8 +25,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.post("/api/expenses", async (req: Request, res: Response) => {
+app.post("/api/transactions", async (req: Request, res: Response) => {
   try {
+    console.log(req.body)
     // Validate request body against the schema
     const parsedData = expenseSchema.safeParse(req.body);
 
@@ -66,17 +67,24 @@ app.post("/api/expenses", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/expenses/:userId", async (req: Request, res: Response) => {
+app.get("/api/transactions/:userId", async (req: Request, res: Response) => {
   const { userId } = req.params;
 
   try {
-    const expenses = await prisma.expense.findMany({
+    const transactions = await prisma.expense.findMany({
       where: { userId },
       orderBy: { date: "desc" },
     });
 
-    if (!expenses || expenses.length === 0) {
-      return res.status(404).json({ message: "No expenses found" });
+    // If no transactions, return empty array with 0 values
+    if (!transactions || transactions.length === 0) {
+      return res.status(200).json({
+        transactions: [],
+        totalSpend: 0,
+        totalEarned: 0,
+        totalBalance: 0,
+        message: "No transactions found",
+      });
     }
 
     const totalSpend = await prisma.expense.aggregate({
@@ -97,7 +105,7 @@ app.get("/api/expenses/:userId", async (req: Request, res: Response) => {
       (totalEarned._sum.amount ?? 0) + (totalSpend._sum.amount ?? 0);
 
     res.status(200).json({
-      expenses,
+      transactions,
       totalSpend: totalSpend._sum.amount ?? 0,
       totalEarned: totalEarned._sum.amount ?? 0,
       totalBalance,
@@ -109,7 +117,7 @@ app.get("/api/expenses/:userId", async (req: Request, res: Response) => {
   }
 });
 
-app.delete("/api/expense/:id/:userId", async (req: Request, res: Response) => {
+app.delete("/api/transactions/:id/:userId", async (req: Request, res: Response) => {
   const { id, userId } = req.params;
 
   try {
